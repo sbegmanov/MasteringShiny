@@ -6,10 +6,221 @@ editor_options:
 ---
 
 ```{r}
+install.packages(c(
+  "gapminder", "ggforce", "gh", "globals", "openintro", "profvis", "RSQLite", "shiny",
+  "shinycssloaders", "shinyFeedback", "shinythemes", "testthat", "thematic", "tidyverse",
+  "vroom", "waiter", "xml2", "zeallot"
+))
 
+install.packages("shiny")
 ```
 
 ```{r}
-
+library(shiny)
 ```
+
+```{r}
+ui <- fluidPage(
+  "Hello, world!"
+)
+
+server <- function(input, ouput, session) {
+  
+}
+
+shinyApp(ui, server)
+```
+
+```{r}
+ui <- fluidPage(
+  selectInput("dataset", label = "Dataset", choices = ls("package:datasets")),
+  verbatimTextOutput("summary"),
+  tableOutput("table")
+)
+```
+
+```{r}
+server <- function(input, output, session) {
+  output$summary <- renderPrint({
+  dataset <- get(input$dataset, "package:datasets")
+  summary(dataset)
+  })
+  output$table <- renderTable({
+  dataset <- get(input$dataset, "package:datasets")
+  dataset
+  })
+}
+shinyApp(ui, server)
+```
+# Reducing the expression
+```{r}
+server <- function(input, output, session) {
+  dataset <- reactive({
+    get(input$dataset, "package:datasets")
+  })
+  
+  output$summary <- renderPrint({
+    summary(dataset())
+  })
+  
+  output$table <- renderTable({
+    dataset()
+  })
+}
+
+shinyApp(ui, server)
+```
+# Ex-1
+```{r}
+ui <- fluidPage(
+  textInput("name", "What's your name?"),
+  textOutput("greeting")
+)
+
+server <- function(input, output, session) {
+  output$greeting <- renderText({
+    paste0("Hello ", input$name)
+  })
+}
+
+shinyApp(ui, server)
+```
+# Ex-2
+```{r}
+ui <- fluidPage(
+  sliderInput("x", label = "Если x равно", min = 1, max = 50, value = 30),
+  "то x умножить на 5 будет",
+  textOutput("product")
+)
+
+server <- function(input, output, session) {
+  output$product <- renderText({
+    input$x * 5
+  })
+}
+
+shinyApp(ui, server)
+```
+# Ex-4
+```{r}
+ui <- fluidPage(
+  sliderInput("x", "Если x равно", min = 1, max = 50, value = 30),
+  sliderInput("y", "и y равно", min = 1, max = 50, value = 5),
+  "то (x * y) будет", textOutput("product"),
+  "(x * y) + 5 будет", textOutput("product_plus5"),
+  "а (x * y) + 10 будет", textOutput("product_plus10")
+)
+
+server <- function(input, output, session) {
+output$product <- renderText({
+  product <- input$x * input$y
+  product
+})
+
+output$product_plus5 <- renderText({
+  product <- input$x * input$y
+  product + 5
+})
+
+output$product_plus10 <- renderText({
+  product <- input$x * input$y
+  product + 10
+})
+}
+shinyApp(ui, server)
+```
+
+```{r}
+ui <- fluidPage(
+  sliderInput("x", "Если x равно", min = 1, max = 50, value = 30),
+  sliderInput("y", "и y равно", min = 1, max = 50, value = 5),
+  "то (x * y) будет", textOutput("product"),
+  "(x * y) + 5 будет", textOutput("product_plus5"),
+  "а (x * y) + 10 будет", textOutput("product_plus10")
+)
+
+server <- function(input, output, session) {
+  product <- reactive({
+    input$x * input$y
+  })
+
+  output$product <- renderText({
+    product()
+  })
+
+  output$product_plus5 <- renderText({
+    product() + 5
+  })
+
+  output$product_plus10 <- renderText({
+    product() + 10
+  })
+}
+
+shinyApp(ui, server)
+```
+# Ex-5
+```{r}
+library(ggplot2)
+
+datasets <- c("economics", "diamonds", "seals")
+
+ui <- fluidPage(
+  selectInput("dataset", "Dataset", choices = datasets),
+  verbatimTextOutput("summary"),
+  plotOutput("plot")  # Исправлено
+)
+
+server <- function(input, output, session) {
+  dataset <- reactive({
+    get(input$dataset, "package:ggplot2")
+  })
+
+  output$summary <- renderPrint({
+    summary(dataset())
+  })
+
+  output$plot <- renderPlot({
+    plot(dataset())  # Исправлено
+  }, res = 96)
+}
+
+shinyApp(ui, server)
+```
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  numericInput(inputId = "n", "Sample size", value = 25),
+  plotOutput(outputId = "hist")
+)
+
+server <- function(input, output) {
+  output$hist <- renderPlot({
+    hist(rnorm(input$n))
+  })
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
