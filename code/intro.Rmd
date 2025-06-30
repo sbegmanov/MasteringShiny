@@ -166,22 +166,22 @@ library(ggplot2)
 datasets <- c("economics", "diamonds", "seals")
 
 ui <- fluidPage(
-  selectInput("dataset", "Dataset", choices = datasets),
+  selectInput("my_dataset", "Dataset", choices = datasets),
   verbatimTextOutput("summary"),
   plotOutput("plot")  # Исправлено
 )
 
 server <- function(input, output, session) {
-  dataset <- reactive({
-    get(input$dataset, "package:ggplot2")
+  selected_dataset <- reactive({
+    get(input$my_dataset, "package:ggplot2")
   })
 
   output$summary <- renderPrint({
-    summary(dataset())
+    summary(selected_dataset())
   })
 
   output$plot <- renderPlot({
-    plot(dataset())  # Исправлено
+    plot(selected_dataset())  # Исправлено
   }, res = 96)
 }
 
